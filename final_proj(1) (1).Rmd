@@ -1,9 +1,4 @@
----
-title: "Final_project_213479686_313466112_213138787"
-author: "Team number 13: Amitai Kellerman, Omri Vilan & Roei Yehezkel"
-date: "11-06-2023"
-output: pdf_document
----
+
 
 ```{r load-packages,error=FALSE, include=FALSE, message = FALSE, warning=FALSE}
 library(knitr)
@@ -26,33 +21,6 @@ library(haven)
 child_risk <- read_sav("./data/child_risk.sav")
 
 ```
-
-## 1. Introduction
-
-In general, we will explore how do experiences during youth and social interventions influence the financial stability and adult lives of at risk youth. More specifically, we will look for the impact of traumatic events on the financial independence of at risk youth in adulthood, and the help of social affairs interventions, improving their income levels, a goal that was set by the Israeli government many years ago (see link in appendix 1).
-
-Traumatic events experienced during youth can negatively impact various aspects of life, including education, independence, and financial stability. This analysis aims to understand the effect of social affairs interventions on an individuals connection between traumatic experiences during youth and future financial stability and independence.
-
-This problem is challenging due to the difficulty in collecting accurate income and retrospective information on youth ages. Retrospective data collection often suffers from inconsistencies, making it less reliable. However, the project overcomes this challenge by utilizing longitudinal data collected in real-time during younger ages, providing more reliable and fresh information.\
-Most researches we found, for example TAU's research of barriers in at-risk youth development (see Appendix 2), only refer to general phenomenons with negative effect, rather than diving into specific welfare services, testing for both negative and positive impacts.\
-Understanding this connection is crucial for developing effective interventions and support systems to improve the long-term outcomes of at-risk youth.
-
-Our approach involves analyzing the data, tracking both childhood traumas and welfare service related features with the biggest effect about adulthood income, than using them in a prediction model, in order to prioritize specific welfare services interventions towards youth at-risk with different traumas, who need it the most, thus possibly hinting how to pull at-risk youth out of the cycle of poverty, helping them live an independent life, without continuous dependence on the welfare services.
-
-## 2. Data
-
-Our data is:"Trajectories of at-risk youth (longitudinal data)", by Dr. Talia Schwartz-Tayri.
-
-Each entity represents youth-at risk, with a total of 471 entities,209 of which completed the whole surveys and will be included in our work. The data describes the results of 3 consequent surveys- the first one occured when they were 16-17 years old, before leaving the village. the second one, few months after they left the village and the third one was taken a few years after the second survey when they were 23 - 24 years old. The surveys include emotional, mental, financial and social feature families, which will be relevant to our analysis. The features include numerical, of which part are scalar and part are not, and textual variables. Each time period includes variables regarding the individual's relationships with family & educational staff at boarding school, as well as the skills they have acquired, hopes and expectations about the future and more.
-
-All variables with T3 in the column name (for example, T3education_level) are from the third and final survey. All variables with T2 or B in the column name (for example, ActSeekMentalT2 or B.RAKAZ.SUPPORT) are from the second, mid-point survey. All variables with T1 or nothing extra (nothing of B, T2, T3) in the column name (for example, T1age or country) are from the first survey.
-
-## 3. Methods and results
-
-Our first step in the project was cleaning the data, reducing the dimensions of the data to only the features we might need in our analysis. Next, we decided to use two methods to try answer our question: The first method is regular linear regression after feature importance without model algorithm, and the second method is ordinal regression with regularization. The goal of using two different methods is to see if we get the same features from them both, what will strengthen the results.
-
-For the linear regression, we modified our outcome feature, the income level of youth-at-risk in adulthood, making it useful in linear regression. Because we still had big variable amount, we used feature importance, without model, algorithm on our data, extracting the 50 most important predictors to our outcome variable (appendix 3). We replaced missing values in the median value of each feature, as we found that using the median is the most efficient & accurate way to do so. After fitting the model, we took the 29 variables with the lowest p-value (appendix 4). Linear model indicators results:
-
 ```{r , error=FALSE, include=FALSE, message = FALSE, warning=FALSE}
 ### cleaning data:
 clean_data <- child_risk %>%
@@ -175,19 +143,16 @@ linear_model_results <- youth_fit%>% tidy()%>%
 
 ```
 
-R-squared value:
 
 ```{r sqr}
 glance(youth_fit)$r.squared  # R-squared
 ```
 
-Adjusted R-squared value:
 
 ```{r adj}
 glance(youth_fit)$adj.r.squared # Adjusted R-squared
 ```
 
-RMSE:
 
 ```{r }
 train_pred <- predict(youth_fit, train_data) %>%
@@ -208,7 +173,6 @@ test_rmse <- RMSE(test_pred$income_level, test_pred$.pred)
 cat("RMSE score:", test_rmse, "\n")
 ```
 
-Using cross-validation:
 
 ```{r}
 # Set the seed
@@ -230,7 +194,6 @@ collect_metrics(youth_fit_cv)
 
 ```
 
-The 10 most impactful features (5 positive and 5 negative) and their impact:
 
 ```{r, echo=FALSE, out.width="50%", out.height="50%", warning=FALSE}
 # Extract the coefficients from the fitted model
@@ -317,7 +280,6 @@ test_data_ord_fct <- testing(youth_split)
 
 ```
 
-For the ordinal regression, we performed regularization and then build an ordinal regression model. Full results in appendix 5. Indicators results:
 
 ```{r, echo=FALSE, error=FALSE, warning=FALSE, include=FALSE}
 set.seed(1116)
@@ -374,7 +336,6 @@ actual <- test_data_ord_fct$income_level
 
 ```
 
-RMSE of ordinal regression model:
 
 ```{r, echo=FALSE, out.width="50%", out.height="50%", warning=FALSE}
 predicted <- as.numeric(as.character(predicted))
@@ -388,7 +349,6 @@ rmse=sqrt(mean((df$Actual - df$Predicted)^2))
 rmse
 ```
 
-The 10 most impactful features (5 positive and 5 negative) and their impact:
 
 ```{r, out.width="50%", out.height="50%"}
 # Extract coefficient names and values
@@ -442,38 +402,19 @@ fill = ifelse(Value >= 0, "Positive", "Negative"), cex.main = 0.8)) +
         plot.subtitle = element_text(hjust = -1.5))
 ```
 
-We found out that the two models gives very different features as the most important features. Therefore, We have no absolute certainty for any of the features. We prefer the features of the linear regression model because their features' p-value is much lower, its' rmse is a bit lower as well, and both childhood traumas features & welfare services features, which are more related to our research question, get bigger importance in the linear regression model than the ordinal regression one. The explanation of the meaning of the features we found see appendix.
 
-Even though the linear regression did provide better results than the ordinary one, it's still has its limitations towards our initial hypothesis-as seen both in the coefficients scores and the regression measures(r\^2, adjusted r\^2, rmse). In our training data, youth having a mentor, and having probation officer at youth had a negative effect on the income at adulthood. However, ethnical discrimination did reduce the income level at adulthood. Moreover, the higher contact frequency with village's staff, as well as other social services, the higher future income will be.
-
-## 4.Limitations and Future Work
-
-A significant limitation of our data analysis is the data size and the relatively small percentage of the entities we have all the data about(the youth at-risk who completed all of the surveys), which caused high p-values at many features in our model, and harmed the indexes. Although the data is good enough in our project, its size cannot indicate a more widespread phenomenon around at-risk youth, and does not allow us to make concrete conclusions. We may have gotten fine results replacing missing values in the median, but we are sure that there are better, more efficient and effective ways dealing with missing data. Additional months for improving our analysis would have provided us the opportunity to find more comprehensive and deeper examination of the right method dealing with missing values. Furthermore, Our analysis does not consider demographic factors, which might be important as well. Analyzing subgroups based on origin, for example, might have indicated different results.\
-Moreover, additional months working on our project would allow us to include additional external data, which would improve the measures, and to explore our research question across a variety of countries, dividing the data into ethnic groups as-well. Moreover, we would have assessed welfare services interventions' effectiveness in improving not only the financial aspects of at-risk youth, but also their overall well-being at the future.
-
-## Appendix
-
-1.  A link to YATED government program for at risk youth: <https://www.yated.org/%d7%90%d7%95%d7%93%d7%95%d7%aa/>
-
-2.  A link to TAU research: Barriers and resources in transition to adulthood among at-risk young adults.
-
-    <https://www.yated.org/wp-content/uploads/2020/06/barriers-and-resources.caseworkers-perspectives.pdf>
-
-3.  50 most important feature and their scores, by the feature importance algorithm:
 
 ```{r}
 # 50 most important feature and their scores, by the feature importance algorithm:
 head(roc_imp, 50)
 ```
 
-3.  The linear model fit:
 
 ```{r}
 # The linear model fit results:
 linear_model_results
 ```
 
-4.  30 most important feature and their scores, by regularization algorithm:
 
 ```{r}
 # 30 most important feature and their scores, by regularization algorithm:
@@ -482,320 +423,9 @@ Importance = importance$importance[top30_indices, "Overall"])
 df
 ```
 
-5.  The ordinal model fit:
 
 ```{r}
 #  The ordinal model fit results:
 ctable
 ```
 
-### Source Code
-
-```{r, ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
-
-```
-
-### Data README
-
-Linear Regression:
-
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| Answers labels and their meaning                         | Title label                                                                               | Feature                    |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1-yes\                                                   | Were you in contact with any of the village coordinators since you left?                  | B.CONTACT.WHO_rakaz        |
-| 2-no\                                                    |                                                                                           |                            |
-| 3-refused                                                |                                                                                           |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1- not at all                                            | How frequently are you in contact with the village staff?                                 | B_contact_frequency        |
-|                                                          |                                                                                           |                            |
-| 2-low frequency                                          |                                                                                           |                            |
-|                                                          |                                                                                           |                            |
-| 3- high frequency                                        |                                                                                           |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1- certainly not\                                        | Do you expect having your own apartment?                                                  | B.FUTURE.EXPECT.ALL_5      |
-| 2-probably not                                           |                                                                                           |                            |
-|                                                          |                                                                                           |                            |
-| 3-probably yes                                           |                                                                                           |                            |
-|                                                          |                                                                                           |                            |
-| 4-certainly yes                                          |                                                                                           |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| a scale of 1-5                                           | How happy were you with your dyadic treatment                                             | T3_welfare_service_2\_5    |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1-yes                                                    | Were you not in contact with the village's alumni coordinator?                            | T3_welfare_service_1\_10_1 |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1-yes                                                    | Were you in contact with anyone from the village during and right after leaving it?       | T3place_staff_3            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1-yes                                                    | Do you have any chronic disability?                                                       | T3chronic_disability       |
-|                                                          |                                                                                           |                            |
-| 2-no                                                     |                                                                                           |                            |
-|                                                          |                                                                                           |                            |
-| 3-rather not answer                                      |                                                                                           |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1-yes                                                    | Have you not been to treatment with both our parents and/or siblings?                     | T3_welfare_service_1\_3_1  |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1- Studied in the past                                   | Have you studied anywhere since finishing highschool?                                     | T3education_1              |
-|                                                          |                                                                                           |                            |
-| 2- Currently studying, including on vacation/study break |                                                                                           |                            |
-|                                                          |                                                                                           |                            |
-| 3- Did not study at an educational institution at all    |                                                                                           |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| on a scale of 1-5.                                       | how helpful was your consultation about independent life and financial self-managment?    | B.HELP.FINANCE.DEGREE      |
-|                                                          |                                                                                           |                            |
-| 6- refused to answer                                     |                                                                                           |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| a scale of 1-5                                           | How helpful was your consultation with the village staff regarding rights and the army?   | T3staffandRakaz_help_2\_2  |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| a scale of 1-5                                           | Level of assistance regarding army                                                        | Hacha10                    |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| on a scale of 1-5.                                       | how helpful was your consultation about study options and higher education?               | B.HELP.EDUC.DEGREE         |
-|                                                          |                                                                                           |                            |
-| 6- refused to answer                                     |                                                                                           |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1-no                                                     | Have you felt discriminated against for your skin color in the past year?                 | T3_21.140_5                |
-|                                                          |                                                                                           |                            |
-| 2-yes                                                    |                                                                                           |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| a scale of 1-5                                           | On what level can you trust someone from the staff when you need help or support?         | PnimiaTrust                |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| range: 1.0-4.0                                           | independent life readiness measurement:\                                                  | M1.4                       |
-|                                                          | housing                                                                                   |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| a scale of 1-5                                           | Level of hapiness with current functioning in my main occupation                          | B.MAIN.OCCUPATION_4        |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1-no                                                     | Have you lived with someone who had drinking and/or drug problems?                        | T3_ACE_7                   |
-|                                                          |                                                                                           |                            |
-| 2-yes                                                    |                                                                                           |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1-yes                                                    | Were you in contact with any from of service since dismissing from the army?              | T3_welfare_service_1\_12_5 |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1-you                                                    | Who initiated your contact with the village's senior rakaz?                               | T3Rakaz_1                  |
-|                                                          |                                                                                           |                            |
-| 2-the rakaz                                              |                                                                                           |                            |
-|                                                          |                                                                                           |                            |
-| 3-other                                                  |                                                                                           |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1-yes                                                    | Have you taken family treatment with both your parents and/or siblings in your childhood? | T3_welfare_service_1\_3_2  |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1-no                                                     | Do you have an adult with a positive impact on your life other than your parents?         | Mentor                     |
-|                                                          |                                                                                           |                            |
-| 2-yes                                                    |                                                                                           |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1-no                                                     | Have you felt discriminated against for your faith/religion in the past year?             | T3_21.140_2                |
-|                                                          |                                                                                           |                            |
-| 2-yes                                                    |                                                                                           |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1 -yes                                                   | Were you actively looking for a job in the past 4 weeks?                                  | T3job_seeking              |
-|                                                          |                                                                                           |                            |
-| 2-no                                                     |                                                                                           |                            |
-|                                                          |                                                                                           |                            |
-| 3-about to start a job so not looking                    |                                                                                           |                            |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-| 1-yes                                                    | Were you in contact with a probation officer during your childhood?                       | T3_welfare_service_1\_9_2  |
-+----------------------------------------------------------+-------------------------------------------------------------------------------------------+----------------------------+
-
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| Meaning                                                                                                                      | coefficient                                 | Feature                    |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| those who said that they are in contact with village's coordinators earn less                                                | 1004.5087                                   | B.CONTACT.WHO_rakaz        |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| the higher contact frequency with the village staff at all, the higher income level will be                                  | 1064.5699                                   | B_contact_frequency        |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| the higher belief in  owning an apartment in future, the higher future income will be                                        | 775.7642                                    | B.FUTURE.EXPECT.ALL_5      |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| the higher satisfaction level with dyadic treatment, the higher future income will be                                        | 1045.3859                                   | T3_welfare_service_2\_5    |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| being in contact with the village's alumni coordinator reduces future income                                                 | 871.2576                                    | T3_welfare_service_1\_10_1 |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| being in contact with village's staff right after leaving the village increases future income.                               | 516.1480                                    | T3place_staff_3            |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| those who reported having chronic disability will have lower future income                                                   | 602.8012                                    | T3chronic_disability       |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| being in family treatment reduces future income                                                                              | 235.6263                                    | T3_welfare_service_1\_3_1  |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| those studied in the past but not now earn less than those who learn now, or those who didn't learn                          | 521.4771                                    | T3education_1              |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| the better the consultation about independent life and financial self-managment skills was, the higher future income will be | 523.6759                                    | B.HELP.FINANCE.DEGREE      |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| the better the consultation with the village staff regarding rights and the army was , the higher future income will be      | 138.7166                                    | T3staffandRakaz_help_2\_2  |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| the higher level of assistance regarding army was , the higher future income will be                                         | 307.7303 \| Hacha10                         |                            |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| the better consultation about study options and higher education was , the lower future income will be                       | -386.8029                                   | B.HELP.EDUC.DEGREE         |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| feeling discrimination based on color of skin reduces future income                                                          | -348.4760 \| T3_21.140_5 \|                 |                            |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| the higher trust in village's staff was, the lower future income will be                                                     | -439.9879                                   | PnimiaTrust                |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| the higher\                                                                                                                  | -676.6693 \| M1.4 \| \| \|                  |                            |        |
-| housing & self-living measurement was, the lower future income will be                                                       |                                             |                            |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| the happier\                                                                                                                 | -640.7115 \| B.MAIN.OCCUPATION_4 \| \| \|   |                            |        |
-| the youth was in his main occupation, the lower future income will be                                                        |                                             |                            |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| living with someone who had drinking and/or drug problems reduces future income                                              | -930.5349 \| T3_ACE_7 \|                    |                            |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| being in contact with any from of service since dismissing from the army reduces future income                               | -1785.9188 \| T3_welfare_service_1\_12_5 \| |                            |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| initiating the contact with the village's senior rakaz increases future income.                                              | -1790.3850 \| T3Rakaz_1 \|                  |                            |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| being in family treatments at youth reduces future income                                                                    | -2102.4860 \| T3_welfare_service_1\_3_2 \|  |                            |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| having a mentor rather than their parents reduces future income                                                              | -1620.4173 \| Mentor \|                     |                            |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| Discrimination for faith/religion increases future income.                                                                   | 1154.16                                     | T3_21.140_2                |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| Not looking for a job lowers the future income.                                                                              | -2472.9161 \| T3job_seeking \|              |                            |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-| Having a probation officer in childhood reduces future income.                                                               | -2629.1607 \| T3_welfare_service_1\_9_2 \|  |                            |        |
-+------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------+----------------------------+--------+
-
-Ordinal Regression:
-
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| Answers labels and their meaning                                                                                                      | Title label                                                                                                                                                                                | Feature                  |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-4, 4 being the highest                                                                                                     | Measure of participant's readiness for independent living                                                                                                                                  | life_skills_allT1        |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 2-6, 6 being the highest                                                                                                     | Measures of support given from village's staff                                                                                                                                             | Support                  |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-4, 4 being the highest                                                                                                     | Housing measure of participant's readiness for independent living                                                                                                                          | M1.4                     |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| 1- Studied in the past 2- Currently studying, including on vacation/study break 3- Did not study at an educational institution at all | Educational Status of the participant after high school                                                                                                                                    | T3education_1            |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-4, with 4 being the highest                                                                                                | Housing measure of participant's readiness for independent living                                                                                                                          | B_life_skills_housing    |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| 1- certainly not\                                                                                                                     | The participant's belief in  owning an apartment in future                                                                                                                                 | B.FUTURE.EXPECT.ALL_5    |
-| 2-probably not                                                                                                                        |                                                                                                                                                                                            |                          |
-|                                                                                                                                       |                                                                                                                                                                                            |                          |
-| 3-probably yes                                                                                                                        |                                                                                                                                                                                            |                          |
-|                                                                                                                                       |                                                                                                                                                                                            |                          |
-| 4-certainly yes                                                                                                                       |                                                                                                                                                                                            |                          |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-4, with 4 being the highest                                                                                                | Total measure of participant's readiness for independent living                                                                                                                            | B_life_skills_all        |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5, with 5 being the highest(Very helpful), and 1 being the lowest(Didn't help at all)                                      | The level of assistance of military/national service skills learned                                                                                                                        | Hacha10                  |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5, 5 being the highest                                                                                                     | Functioning level in main occupation                                                                                                                                                       | B_main_occupation_duty   |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| 1-at least once in 2 weeks                                                                                                            | frequency of seeing parents while being in the village labeling                                                                                                                            | ParentMeet               |
-|                                                                                                                                       |                                                                                                                                                                                            |                          |
-| 5-almost never                                                                                                                        |                                                                                                                                                                                            |                          |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5, with 5 being the highest(Very high level) and 1 being the lowest(Very low level)                                        | level satisfication of the contact with alumni coordinator                                                                                                                                 | T3_welfare_service_2\_10 |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| 1- Counselor                                                                                                                          | breakdown of formal mentors of the participant                                                                                                                                             | FormalM1                 |
-|                                                                                                                                       |                                                                                                                                                                                            |                          |
-| 2-Teacher/educator                                                                                                                    |                                                                                                                                                                                            |                          |
-|                                                                                                                                       |                                                                                                                                                                                            |                          |
-| 3- Social worker                                                                                                                      |                                                                                                                                                                                            |                          |
-|                                                                                                                                       |                                                                                                                                                                                            |                          |
-|  4- other                                                                                                                             |                                                                                                                                                                                            |                          |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5, with 5 being the highest(Very high level), and 1 being the lowest(Very low level)                                       | if the participant will need assistance or would like to consult about something in the future, at what level the participant will turn to the village/boarding school he/she has been it? | HelpSeekInten1           |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5, with 5 being the highest(Very high level), and 1 being the lowest(Very low level)                                       | The participant's satisfaction level from functioning in main occupation                                                                                                                   | B.MAIN.OCCUPATION_4      |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5, with 5 being the highest(Very high level), and 1 being the lowest(Very low level)                                       | The participant's satisfaction level from contact with village staff                                                                                                                       | T3staffRakaz_evalua      |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| 5-at least once in 2 weeks                                                                                                            | Frequency of contact with any village staff member after leaving the village                                                                                                               | B.CONTACT.DURATION       |
-|                                                                                                                                       |                                                                                                                                                                                            |                          |
-| 1-almost never                                                                                                                        |                                                                                                                                                                                            |                          |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5, with 5 being the highest(Very high level), and 1 being the lowest(Can't trust at all)                                   | level of participant's trust in his/her village staff member, when the participant needs support                                                                                           | PnimiaTrust              |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5,with 5 being the highest(Very high level), and 1 being the lowest(Very low level)                                        | The assistance level the alumni coordinator can provide to the participant in employment possibilities                                                                                     | V28.3b                   |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5,with 5 being the highest(Very high level), and 1 being the lowest(Very low level)                                        | The assistance level the alumni coordinator can provide to the participant in rights in the military/national service and preparations for military/national service                       | V28.2b                   |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5, with 5 being the highest(Very helpful), and 1 being the lowest(Didn't help at all)                                      | The level of assistance of  financial education skills learned                                                                                                                             | Hacha11                  |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| 1=less than a year                                                                                                                    | the amount of time the participant know the mentor                                                                                                                                         | MentorTime               |
-|                                                                                                                                       |                                                                                                                                                                                            |                          |
-| 5=all his/her life                                                                                                                    |                                                                                                                                                                                            |                          |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5, with 5 being the highest(Very helpful), and 1 being the lowest(Didn't help at all)                                      | The level of assistance of  sexual education skills learned                                                                                                                                | Hacha12                  |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5, with 5 being the highest(Very helpful), and 1 being the lowest(Didn't help at all)                                      | The level of assistance of  acquiring a profession for the future  skills learned                                                                                                          | Hacha9                   |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5, with 5 being the highest(Very high level), and 1 being the lowest(Very low level)                                       | if the participant will need assistance or would like to consult about something in the future, at what level the participant will turn to the alumni coordinator?                         | HelpSeekInten3           |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| a scale of 1-5, with 5 being the highest(Very high level), and 1 being the lowest(There is no trust at all)                           | level of support of village staff member, in the participant's decisions and choices                                                                                                       | PnimiaSupp               |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-4, with 4 being the lowest (no loneliness at all), and 1 the highest(high loneliness level)                                | Level of loneliness in the last 2 years                                                                                                                                                    | T3_10.150                |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| 5-At least once every two weeks 1-No contact at all                                                                                   | Frequency of contact with staff member at the boarding school, that is not the alumni coordinator, in the last 2 years                                                                     | T3place_staff_freq       |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5,with 5 being the highest(Very high level), and 1 being the lowest(Very low level)                                        | The assistance level the alumni coordinator can provide to the participant in study and higher education options                                                                           | V28.1b                   |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-| scale of 1-5, with 5 being the highest(Very high level) and 1 being the lowest(Very low level)                                        | level satisfication of the contact with school counselor                                                                                                                                   | T3_welfare_service_2\_1  |
-+---------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------+
-
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| Meaning                                                                                                                                                          | coefficient | Feature                  |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| participant with higher measure of readiness for independent living earnmore                                                                                     | 0.5223      | life_skills_allT1        |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the higher support given from village staff, the lower future income would be                                                                                    | -0.07659    | Support                  |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| participant with higher measure of readiness for independent living earn less                                                                                    | -0.4377     | M1.4                     |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| those studied in the past but not now earn less than those who learn now, or those who didn't learn                                                              | 0.2462      | T3education_1            |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| participant with higher measure of readiness for independent living earned less                                                                                  | -0.2379     | B_life_skills_housing    |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the higher belief in  owning an apartment in future, the higher future income would be                                                                           | 0.3451      | B.FUTURE.EXPECT.ALL_5    |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| participant with higher measure of readiness for independent living earned more                                                                                  | 0.1280      | B_life_skills_all        |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the more helpful the military/national service skills learned are, the higher future income will be                                                              | 0.1632      | Hacha10                  |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the better functioning level in main occupation, the higher future income will be                                                                                | 0.3093      | B_main_occupation_duty   |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the higher contact frequency with parents, the higher future income will be                                                                                      | -0.0803     | ParentMeet               |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the higher satisfaction level from contact with alumni coordinator                                                                                               | -0.0607     | T3_welfare_service_2\_10 |
-|                                                                                                                                                                  |             |                          |
-| , the higher future income will be                                                                                                                               |             |                          |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| social workers and other mentors have more positive impact on income level than counselor, teacher/educator                                                      | 0.0845      | FormalM1                 |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the higher odds the participant will turn to the village for help, the higher future income will be                                                              | 0.0350      | HelpSeekInten1           |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the higher satisfaction level from functioning in main occupation                                                                                                | -0.3439     | B.MAIN.OCCUPATION_4      |
-|                                                                                                                                                                  |             |                          |
-| , the lower future income will be                                                                                                                                |             |                          |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the higher satisfaction level from contact with village staff                                                                                                    | -0.0186     | T3staffRakaz_evalua      |
-|                                                                                                                                                                  |             |                          |
-| , the lower future income will be                                                                                                                                |             |                          |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the higher contact frequency village staff member after leaving the village, the higher future income will be                                                    | 0.0905      | B.CONTACT.DURATION       |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the higher trust in village staff member, the higher future income will be                                                                                       | 0.1644      | PnimiaTrust              |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the more support the alumni coordinator can provide in employment possibilities, the higher future income will be                                                | 0.0884      | V28.3b                   |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the more support the alumni coordinator can provide in military/national service and preparations for military/national service, the lower future income will be | -0.2761     | V28.2b                   |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the more helpful the financial education skills learned are, the higher future income will be                                                                    | 0.0321      | Hacha11                  |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the longer the time the participant know his/her mentor, the higher future income will be                                                                        | 0.1030      | MentorTime               |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the more helpful the sexual education  skills learned are, the higher future income will be                                                                      | 0.1045      | Hacha12                  |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the more helpful acquiring a profession for the future skills learned are, the lower future income will be                                                       | -0.0034     | Hacha9                   |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the higher odds the participant will turn to the alumni coordinator for help, the lower future income will be                                                    | -0.0060     | HelpSeekInten3           |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the more support from village staff member, the higher future income will be                                                                                     | 0.1644      | PnimiaSupp               |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the lower loneliness level felt, the higher future income will be                                                                                                | 0.2439      | T3_10.150                |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the more contact with village staff, the lower future income will be                                                                                             | -0.0791     | T3place_staff_freq       |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the more support the alumni coordinator can provide in study and higher education options, the lower future income will be                                       | -0.0668     | V28.1b                   |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
-| the higher satisfaction level from contact with school counselor                                                                                                 | 0.0230      | T3_welfare_service_2\_1  |
-|                                                                                                                                                                  |             |                          |
-| , the higher future income will be                                                                                                                               |             |                          |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------+
