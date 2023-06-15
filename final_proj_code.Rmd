@@ -145,12 +145,10 @@ linear_model_results <- youth_fit%>% tidy()%>%
 
 
 ```{r sqr}
-glance(youth_fit)$r.squared  # R-squared
-```
-
-
-```{r adj}
-glance(youth_fit)$adj.r.squared # Adjusted R-squared
+rsq <- glance(youth_fit)$r.squared  # R-squared
+arsq <- glance(youth_fit)$adj.r.squared   # Adjusted R-squared
+print(paste("R squared is", rsq))
+print(paste("Adjusted R squared is", arsq))
 ```
 
 
